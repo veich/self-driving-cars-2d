@@ -1,27 +1,29 @@
-function Car(x, y, speed, angle) {
-	this.x = x || 100;
-	this.y = y || 100;
-	this.speed = speed || 0;
-	this.angle = angle || - Math.PI / 2;
+class Car {
+	constructor(x, y, speed, angle) {
+		this.x = x || 100;
+		this.y = y || 100;
+		this.speed = speed || 0;
+		this.angle = angle || - Math.PI / 2;
+	}
 
-	this.updateLocation = () => {
+	updateLocation(){
 		this.x += Math.cos(this.angle) * this.speed;
 		this.y += Math.sin(this.angle) * this.speed;
 	}
 
-	this.throttle = (acc) => {
+	throttle(acc){
 		this.speed += acc;
 	}
 
-	this.steer = (angle) => {
+	steer(angle){
 		this.angle += angle;
 	}
 
-	this.fullStop = () => {
+	fullStop(){
 		this.speed = 0;
 	}
 
-	this.show = () => {
+	show(){
 		push();
 		stroke(50)
 		translate(this.x, this.y);
