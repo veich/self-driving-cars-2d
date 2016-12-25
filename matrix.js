@@ -9,10 +9,10 @@ class Matrix {
 		if (this.m * this.n !== this.mx.length) throw new Error();
 	}
 
-	maxValue() { return Math.max(...this.mx) };
+	_maxValue() { return Math.max(...this.mx.map(x => Math.abs(x))) };
 
 	normalisedMatrix(scale) {
-		const newScale = scale || this.maxValue();
+		const newScale = scale || this._maxValue();
 		return new Matrix(
 			this.m,
 			this.n,
@@ -20,12 +20,31 @@ class Matrix {
 			newScale);
 	}
 
+	sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+
 	applySigmoid() {
 		return new Matrix(
 			this.m,
 			this.n,
-			this.mx.map(x => 1 / (1 + Math.exp(-x))),
+			this.mx.map(x => this.sigmoid(x)),
 			this.scale);
+	}
+
+	static sigmoidDerivative(x) {
+		const sigmoid = (x) => 1 / (1 + Math.exp(-x));
+		return sigmoid(x) * (1 - sigmoid(x));
+	}
+
+	applyTanh() {
+		return new Matrix(
+			this.m,
+			this.n,
+			this.mx.map(x => Math.tanh(x)),
+			this.scale);
+	}
+
+	static tanhDerivative(x){
+		return 1 - Math.pow(Math.tanh(x), 2)
 	}
 
 	static transposeMultMatrix(m1, m2) {
@@ -41,8 +60,17 @@ class Matrix {
 			  result[col1*m2.n+col2] = sum;
 		  }
 	  }
-	  console.log(result);
 	  return new Matrix(m1.n, m2.n, result);
+	}
+
+	static transpose(matrix) {
+		const result = [];
+		for (var i = 0; i < matrix.m; i++) {
+			for (var j = 0; j < matrix.n; j++) {
+				result.push(matrix.mx[matrix.m*j + i])
+			};
+		};
+		return new Matrix(matrix.n, matrix.m, result);
 	}
 
 	static multMatrix(m1, m2) {
@@ -57,7 +85,6 @@ class Matrix {
 	      result[row1*m2.n+col2] = sum;
 	    }
 	  }
-	  console.log(result);
 	  return new Matrix(m1.m, m2.n, result);
 	}
 
@@ -67,6 +94,15 @@ class Matrix {
 			mx[i] = (2 * Math.random()) - 1;
 		}
 		return new Matrix(m, n, mx);
+	}
+
+	static subtractMatrix(m1, m2) {
+		if (m1.m !== m2.m || m1.n !== m2.n) throw new Error();
+		const subtractedVals = [];
+		for (var i = 0; i < m1.mx.length; i++) {
+			subtractedVals.push(m1.mx[i] - m2.mx[i]);
+		};
+		return new Matrix(m1.m, m1.n, subtractedVals);
 	}
 }
 

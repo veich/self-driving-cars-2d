@@ -3,6 +3,7 @@ let car;
 setup = () => {
 	createCanvas(window.innerWidth , window.innerHeight);
 	background(50);
+	// frameRate(5);
 	car = new Car(width/2, height/2);
 	car.show();
 }
