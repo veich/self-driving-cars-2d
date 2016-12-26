@@ -1,6 +1,6 @@
 'use strict';
-const Matrix = require('./matrix');
-const NeuralNetwork = require('./neural_network');
+const Matrix = require('./lib/matrix');
+const NeuralNetwork = require('./lib/neural_network');
 
 const nNet = new NeuralNetwork();
 // const X = new Matrix(3, 2, [3, 5, 5, 1, 10, 2]);
