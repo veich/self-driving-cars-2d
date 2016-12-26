@@ -9,7 +9,10 @@ class Car {
 			[20,15],
 			[-20,-15],
 			[-20,15]];
-		// this.sensor = [{ x:  }]
+		this.sensors = [
+			{ x: 100, y: -75 },
+			{ x: 100, y: 75 }
+			]
 	}
 
 	updateLocation(){
@@ -50,17 +53,11 @@ class Car {
 		rect(-12, 12, 8, 4);
 		rect(6, -12, 8, 4);
 		rect(6, 12, 8, 4);
-		// corners
-		fill(100,255,0);
-		ellipse(this.corners[0][0], this.corners[0][1], 5);
-		ellipse(this.corners[1][0], this.corners[1][1], 5);
-		ellipse(this.corners[2][0], this.corners[2][1], 5);
-		ellipse(this.corners[3][0], this.corners[3][1], 5);
 		// sensors
 		fill(255,255,0);
 		stroke(255,255,0);
-		line(0,0,100,-75);
-		line(0,0,100,75);
+		line(0, 0, this.sensors[0].x, this.sensors[0].y);
+		line(0, 0, this.sensors[1].x, this.sensors[1].y);
 		pop();
 	}
 }

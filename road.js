@@ -5,7 +5,6 @@ class Road {
     this.roadW = 150 || Math.min(screenW, screenH) / 5;
     this.offset = 100;
     this.carStart = { w: screenW/2, h: this.offset + this.roadW/2 };
-    this.crashSite = [screenW/2, screenH/2];
     this.boundaries = this.getRoadBoundaries();
   }
 
@@ -64,38 +63,90 @@ class Road {
     pop();
   }
 
-  isCarOffRoad(car) {
+  getCarCrashStatus(car) {
     // calculating absolute car corner positions
     // 25^2 = 20^2 + 15^2 // car dimensions
-    for (var i = 0; i < 4; i++) {
+    const crashObject = { isCrashed: false };
+    for (var i = 0; i < car.corners.length; i++) {
       const ang = Math.atan2(car.corners[i][1], car.corners[i][0]);
       const cornerX = car.x + Math.cos(ang + car.angle)*25;
       const cornerY = car.y + Math.sin(ang + car.angle)*25;
       for (var j = 0; j < this.boundaries.length; j++) {
-        if (
-          this.lineIntersects(car.x, car.y, cornerX, cornerY,
-          ...this.boundaries[j])) {
-          return true;
+        const intersection = this.getLineIntersection(car.x, car.y, cornerX, cornerY, ...this.boundaries[j]);
+        if (intersection.isIntersecting) {
+          return Object.assign(crashObject, {
+            x: intersection.x,
+            y: intersection.y,
+            isCrashed: true
+          });
         }
-      };
-    };
-    return false;
+      }
+    }
+    return crashObject;
   }
 
-  showCrashSite() {
+  showCrashSite(x, y) {
     push();
-    fill(150, 0, 0);
-    ellipse(this.crashSite[0], this.crashSite[1], 10);
+    fill(255,0,0);
+    ellipse(x, y, 25);
     pop();
   }
 
+  getSensorReadings(car) {
+    const sensorIntersections = [];
+    for (var i = 0; i < car.sensors.length; i++) {
+      const maxDistance = 125;
+      const bufferedIntersections = [];
+      const ang = Math.atan2(car.sensors[i].y, car.sensors[i].x);
+      const sensorTipX = car.x + Math.cos(ang + car.angle)*maxDistance;
+      const sensorTipY = car.y + Math.sin(ang + car.angle)*maxDistance;
+      for (var j = 0; j < this.boundaries.length; j++) {
+        const intersection = this.getLineIntersection(car.x, car.y, sensorTipX, sensorTipY, ...this.boundaries[j]);
+        if (intersection.isIntersecting) {
+          if (bufferedIntersections.length === 0) {
+            const distance = this.getTwoPointDistance(
+              car.x, car.y, intersection.x, intersection.y);
+            bufferedIntersections.push(Object.assign(intersection, { distance, value: distance/maxDistance }));
+          } else {
+            const distance = this.getTwoPointDistance(
+              car.x, car.y, intersection.x, intersection.y);
+            if (distance < bufferedIntersections[0].distance) {
+              bufferedIntersections[0] = Object.assign(intersection, { distance, value: distance/maxDistance });
+            }
+          }
+        }
+      }
+      if (bufferedIntersections.length > 0) {
+        sensorIntersections[i] = bufferedIntersections[0];
+      } else {
+        const distance = this.getTwoPointDistance(car.x, car.y, sensorTipX, sensorTipY);
+        sensorIntersections[i] = {
+          isIntersecting: false,
+          x: sensorTipX,
+          y: sensorTipY,
+          distance,
+          value: 1
+        }
+      }
+    }
+    return sensorIntersections;
+  }
 
+  showSensorIntersections(intersections) {
+    push();
+    fill(255,255,0);
+    intersections.forEach((intersection) => {
+      if (intersection.isIntersecting) ellipse(intersection.x, intersection.y, 10);
+    });
+    pop();
+  }
 
   // copied from net
-  lineIntersects(x1, y1, x2, y2, x3, y3, x4, y4) {
+  getLineIntersection(x1, y1, x2, y2, x3, y3, x4, y4) {
     let a1, a2, b1, b2, c1, c2;
     let r1, r2 , r3, r4;
     let denom, offset, num;
+    let intersectObject = {}
     // Compute a1, b1, c1, where line joining points 1 and 2
     // is "a1 x + b1 y + c1 = 0".
     a1 = y2 - y1;
@@ -107,7 +158,8 @@ class Road {
     // Check signs of r3 and r4. If both point 3 and point 4 lie on
     // same side of line 1, the line segments do not intersect.
     if ((r3 !== 0) && (r4 !== 0) && this.sameSign(r3, r4)){
-      return false;
+      return Object.assign(intersectObject, { isIntersecting: false });
+      // return false;
     }
     // Compute a2, b2, c2
     a2 = y4 - y3;
@@ -120,7 +172,8 @@ class Road {
     // on same side of second line segment, the line segments do
     // not intersect.
     if ((r1 != 0) && (r2 != 0) && (this.sameSign(r1, r2))){
-      return false;
+      return Object.assign(intersectObject, { isIntersecting: false });
+      // return false;
     }
     //Line segments intersect: compute intersection point.
     denom = (a1 * b2) - (a2 * b1);
@@ -138,29 +191,34 @@ class Road {
     // sign of the numerator.
     num = (b1 * c2) - (b2 * c1);
     if (num < 0){
-      this.crashSite[0] = (num - offset) / denom;
+      Object.assign(intersectObject, { x: (num - offset) / denom });
+      // this.crashSite[0] = (num - offset) / denom;
     } 
     else {
-      this.crashSite[0] = (num + offset) / denom;
+      Object.assign(intersectObject, { x: (num + offset) / denom });
+      // this.crashSite[0] = (num + offset) / denom;
     }
 
     num = (a2 * c1) - (a1 * c2);
     if (num < 0){
-      this.crashSite[1] = ( num - offset) / denom;
+       Object.assign(intersectObject, { y: (num - offset) / denom });
+      // this.crashSite[1] = ( num - offset) / denom;
     } 
     else {
-      this.crashSite[1] = (num + offset) / denom;
+      Object.assign(intersectObject, { y: (num + offset) / denom });
+      // this.crashSite[1] = (num + offset) / denom;
     }
 
     // lines_intersect
-    return true;
+    return Object.assign(intersectObject, { isIntersecting: true });
+    // return true;
   }
 
   sameSign(a, b) {
     return ((a * b) >= 0);
   }
 
-  twoPointDistance(x1, y1, x2, y2) {
+  getTwoPointDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1-y2),2));
   }
 
