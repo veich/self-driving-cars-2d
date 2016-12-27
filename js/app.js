@@ -1,28 +1,28 @@
 let game;
 
 setup = () => {
-	game = new Game();
-	game.initGame();
+  game = new Game();
+  game.initGame();
 }
 
 draw = () => {
-	if(!game.isGameOver) {
-		game.drawGameElements();
+  if(!game.isGameOver) {
+    game.drawGameElements();
 
-		const crashInfo = game.getCarCrashStatus();
+    const crashInfo = game.getCarCrashStatus();
 
-		if (crashInfo.isCrashed) {
-			game.handleGameOver(crashInfo);
-		} else {
-			game.updateGameState();
-		}
-	}
+    if (crashInfo.isCrashed) {
+      game.handleGameOver(crashInfo);
+    } else {
+      game.updateGameState();
+    }
+  }
 }
 
 keyPressed = () => {
-	game.handleKeyPressedInputs();
+  game.handleKeyPressedInputs();
 }
 
 keyTyped = () => {
-	game.handleKeyTypedInputs();
+  game.handleKeyTypedInputs();
 }
