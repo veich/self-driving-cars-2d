@@ -3,15 +3,13 @@ class Game {
     this.isGameOver = false;
   }
 
-  initGame(loadTrainedCar, manualControl) {
+  initGame() {
     createCanvas(window.innerWidth , window.innerHeight);
     frameRate(0);
-    this.manualControl = manualControl;
-    this.nNet = new Network(loadTrainedCar);
+    this.nNet = new NeuralNetwork();
     this.road = new Road(width, height);
     this.car = new Car(this.road.carStart.w, this.road.carStart.h, 3, 2*Math.PI);
-    // START CAR IN OTHER DIRECTION
-    // this.car = new Car(this.road.carStart.w, this.road.carStart.h, 3, Math.PI);
+    // this.car = new Car(this.road.carStart.w, this.road.carStart.h, 10, Math.PI);
   }
 
   drawGameElements() {
@@ -34,21 +32,20 @@ class Game {
   }
 
   updateGameState() {
-    if (this.manualControl) {
-      // MANUAL CONTROL
-      if(keyIsDown(LEFT_ARROW)) this.car.steer(-0.06);
-      if(keyIsDown(RIGHT_ARROW)) this.car.steer(0.06);
-    } else {
-      // AI CONTROL
-      const sensorData = this.getSensorReadings();
-      this.showSensorIntersections(sensorData);
-      const yHat = this.nNet.forwardPropagate(sensorData[0].value, sensorData[1].value)
+    // MANUAL CONTROL
+    // if(keyIsDown(LEFT_ARROW)) car.steer(-0.06);
+    // if(keyIsDown(RIGHT_ARROW)) car.steer(0.06);
 
-      if (yHat < 0) {
-        this.car.steer(-0.06);
-      } else {
-        this.car.steer(0.06);
-      }
+    // AI CONTROL
+    const sensorData = this.getSensorReadings();
+    this.showSensorIntersections(sensorData);
+    const X = new Matrix(1, 2, [sensorData[0].value, sensorData[1].value]);
+    const yHat = this.nNet.forwardPropagate(X)
+
+    if (yHat.mx[0] < 0) {
+      this.car.steer(-0.06);
+    } else {
+      this.car.steer(0.06);
     }
   }
 
@@ -64,12 +61,11 @@ class Game {
   getCarCrashStatus() {
     // calculating absolute car corner positions
     // 25^2 = 20^2 + 15^2 // car dimensions
-    const centerToCornerDistance = 25;
     const crashObject = { isCrashed: false };
     for (var i = 0; i < this.car.corners.length; i++) {
       const ang = Math.atan2(this.car.corners[i][1], this.car.corners[i][0]);
-      const cornerX = this.car.x + Math.cos(ang + this.car.angle) * centerToCornerDistance;
-      const cornerY = this.car.y + Math.sin(ang + this.car.angle) * centerToCornerDistance;
+      const cornerX = this.car.x + Math.cos(ang + this.car.angle)*25;
+      const cornerY = this.car.y + Math.sin(ang + this.car.angle)*25;
       for (var j = 0; j < this.road.boundaries.length; j++) {
         const intersection = getLineIntersection(
           this.car.x, this.car.y, cornerX, cornerY,

@@ -1,7 +1,7 @@
 const Network = require('./network');
 
 const net = new Network();
-const learningRate = 0.11;
+const learningRate = 0.1;
 
 console.log('RANDOM NETWORK:');
 console.log('OR: 0 - 0 => ' + net.forwardPropagate(0,0));

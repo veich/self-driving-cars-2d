@@ -2,9 +2,7 @@ let game;
 
 setup = () => {
   game = new Game();
-  const loadTrainedCar = true;
-  const manualControl = false;
-  game.initGame(loadTrainedCar, manualControl);
+  game.initGame();
 }
 
 draw = () => {
