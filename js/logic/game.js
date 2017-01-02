@@ -4,14 +4,10 @@ class Game {
   }
 
   initGame(loadTrainedCar, manualControl) {
-    createCanvas(window.innerWidth , window.innerHeight);
-    frameRate(0);
     this.manualControl = manualControl;
     this.nNet = new Network(loadTrainedCar);
     this.road = new Road(width, height);
     this.car = new Car(this.road.carStart.w, this.road.carStart.h, 3, 2*Math.PI);
-    // START CAR IN OTHER DIRECTION
-    // this.car = new Car(this.road.carStart.w, this.road.carStart.h, 3, Math.PI);
   }
 
   drawGameElements() {

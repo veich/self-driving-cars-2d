@@ -1,23 +1,25 @@
 'use strict';
 const trainedWeights =
 [
-  0.9968231228307647,
-  0.5766108080217949,
-  -0.35811974973937355,
-  0.6413079977787466,
-  0.85082922873955,
-  0.937126673833518,
-  0.4239171261038006,
-  0.7754512491944023,
-  0.6626161080314295,
-  -0.6702681193145068,
-  0.9495441231363393,
-  -0.7757151881504463,
-  -0.8996670657303909
+  -0.17388269723978,
+  -0.9408898765083453,
+  -0.9680220174193015,
+  -0.901587979190448,
+  -0.6824033558548086,
+  0.8021699891855123,
+  -0.48631775293315904,
+  0.3309338528487187,
+  0.3976437533765602,
+  0.7617126496311082,
+  -0.1252724552948381,
+  0.08662441620940653,
+  0.27912316075924615
 ];
 
 class Network {
-  constructor(trainedCar) {
+  constructor(loadTrainedCar) {
+    this.weights = (loadTrainedCar) ? trainedWeights : this.getRandomWeights();
+
     this.N1 = 0;
     this.N2 = 0;
     this.N3 = 0;
@@ -28,20 +30,20 @@ class Network {
     this.B1 = 1;
     this.B2 = 1;
 
-    this.w13 = (trainedCar) ? trainedWeights[0] : this.rand();
-    this.w14 = (trainedCar) ? trainedWeights[1] : this.rand();
-    this.w15 = (trainedCar) ? trainedWeights[2] : this.rand();
-    this.w23 = (trainedCar) ? trainedWeights[3] : this.rand();
-    this.w24 = (trainedCar) ? trainedWeights[4] : this.rand();
-    this.w25 = (trainedCar) ? trainedWeights[5] : this.rand();
-    this.w36 = (trainedCar) ? trainedWeights[6] : this.rand();
-    this.w46 = (trainedCar) ? trainedWeights[7] : this.rand();
-    this.w56 = (trainedCar) ? trainedWeights[8] : this.rand();
+    this.w13 = this.weights[0];
+    this.w14 = this.weights[1];
+    this.w15 = this.weights[2];
+    this.w23 = this.weights[3];
+    this.w24 = this.weights[4];
+    this.w25 = this.weights[5];
+    this.w36 = this.weights[6];
+    this.w46 = this.weights[7];
+    this.w56 = this.weights[8];
 
-    this.b13 = (trainedCar) ? trainedWeights[9] : this.rand();
-    this.b14 = (trainedCar) ? trainedWeights[10] : this.rand();
-    this.b15 = (trainedCar) ? trainedWeights[11] : this.rand();
-    this.b26 = (trainedCar) ? trainedWeights[12] : this.rand();
+    this.b13 = this.weights[9];
+    this.b14 = this.weights[10];
+    this.b15 = this.weights[11];
+    this.b26 = this.weights[12];
 
     this.N3error = 0;
     this.N4error = 0;
@@ -114,6 +116,14 @@ class Network {
 
   tanhDerivative(x){
     return 1 - Math.pow(Math.tanh(x), 2);
+  }
+
+  getRandomWeights() {
+    const weights = [];
+    for (var i = 0; i <= 12; i++) {
+      weights.push(this.rand());
+    };
+    return weights;
   }
 
 }
